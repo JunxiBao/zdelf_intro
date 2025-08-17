@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>紫癜精灵 · 让自我管理更轻盈</title>
+  <meta name="description" content="紫癜精灵——极简记录、聪明提醒、趋势一目了然。" />
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-accent: #f6f7ff;
+      --surface: #fbfbfe;
+      --surface-2: #f3f4f8;
+      --text: #141416;
+      --muted: #5b5f6b;
+      --primary: #7c3aed;
+      --primary-2: #a78bfa;
+      --cyan: #22d3ee;
+      --amber: #f59e0b;
+      --outline: #e7e7ee;
+      --shadow-1: 0 4px 12px rgba(20, 20, 20, .06);
+      --shadow-2: 0 10px 28px rgba(20, 20, 20, .10);
+      --ease: cubic-bezier(.2, 0, 0, 1);
+      --dur-f: 160ms;
+      --dur-m: 280ms;
+      --r-lg: 20px;
+      --r-md: 14px;
+      --r-sm: 8px;
+    }
+
+    /* ===== 视觉升级：玻璃质感、渐变描边、装饰光斑、下划线 ===== */
+    :root {
+      --ring1: linear-gradient(135deg, rgba(124, 58, 237, .45), rgba(34, 211, 238, .35));
+      --ring2: linear-gradient(135deg, rgba(167, 139, 250, .5), rgba(245, 158, 11, .35));
+      --glass: rgba(255, 255, 255, .55);
+      --glass-dark: rgba(18, 18, 18, .55);
+    }
+
+    /* 页面彩色光斑背景（无黑线） */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(124, 58, 237, .06), transparent 55%),
+        radial-gradient(circle at 80% 10%, rgba(34, 211, 238, .07), transparent 45%),
+        radial-gradient(circle at 15% 80%, rgba(245, 158, 11, .05), transparent 50%);
+      background-size: auto, auto, auto;
+      filter: saturate(120%);
+    }
+
+    /* 卡片渐变描边 + 玻璃态 */
+    .panel,
+    .kp,
+    .quote {
+      border: 1px solid transparent;
+      background:
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        var(--ring1) border-box;
+      backdrop-filter: saturate(110%) blur(6px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+
+      .panel,
+      .kp,
+      .quote {
+        background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring2) border-box;
+      }
+    }
+
+    /* 标题渐变下划线 */
+    .h2 {
+      position: relative;
+    }
+
+    .h2::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      height: 6px;
+      width: 88px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary), var(--cyan));
+    }
+
+    /* 引用更优雅 */
+    .quote {
+      position: relative;
+    }
+
+    .quote::before {
+      content: "\201C";
+      /* 左引号 */
+      position: absolute;
+      left: 12px;
+      top: 8px;
+      font-size: 28px;
+      line-height: 1;
+      color: rgba(124, 58, 237, .28);
+    }
+
+    /* 导航链接：下划线动画 */
+    .link {
+      position: relative;
+    }
+
+    .link::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 6px;
+      height: 2px;
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur-m) var(--ease);
+      background: linear-gradient(90deg, var(--primary), var(--cyan));
+    }
+
+    .link:hover::after {
+      transform: scaleX(1);
+    }
+
+    /* Hero 装饰光斑（柔和） */
+    .hero .container {
+      position: relative;
+    }
+
+    .hero .container::before,
+    .hero .container::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      filter: blur(28px);
+      pointer-events: none;
+      z-index: -1;
+      opacity: .55;
+      animation: blob 18s ease-in-out infinite;
+    }
+
+    .hero .container::before {
+      left: -60px;
+      top: -40px;
+      background: radial-gradient(circle, rgba(124, 58, 237, .35), transparent 60%);
+    }
+
+    .hero .container::after {
+      right: -60px;
+      top: -20px;
+      background: radial-gradient(circle, rgba(34, 211, 238, .35), transparent 60%);
+      animation-delay: -6s;
+    }
+
+    @keyframes blob {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(10px, -14px) scale(1.06);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    /* 跑马灯边缘渐隐与自动滚动 */
+    .marquee {
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      scroll-snap-type: x mandatory;
+    }
+
+    .marquee .pill {
+      scroll-snap-align: start;
+    }
+
+    /* 顶部返回按钮（浮动） */
+    .to-top {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, var(--primary), var(--cyan)) padding-box, var(--ring1) border-box;
+      color: #fff;
+      font-weight: 900;
+      box-shadow: var(--shadow-2);
+      display: grid;
+      place-items: center;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform var(--dur-m) var(--ease), opacity var(--dur-m) var(--ease), filter var(--dur-m) var(--ease);
+    }
+
+    .to-top.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .to-top:hover {
+      filter: saturate(115%);
+    }
+
+    /* 按钮按下的“物理感” */
+    .btn:active {
+      transform: translateY(0) scale(.98);
+      filter: saturate(100%);
+    }
+
+    /* ===== 动画：基础 ===== */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spinGlow {
+      0% {
+        filter: drop-shadow(0 0 0 rgba(124, 58, 237, .0));
+        transform: rotate(0deg);
+      }
+
+      50% {
+        filter: drop-shadow(0 6px 12px rgba(124, 58, 237, .25));
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes shine {
+      from {
+        transform: translateX(-120%);
+      }
+
+      to {
+        transform: translateX(120%);
+      }
+    }
+
+    /* 进场通用类（由 JS 触发 .show） */
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .reveal.show {
+      animation: fadeUp var(--dur-m) var(--ease) forwards;
+      animation-delay: calc(var(--d, 0) * 120ms);
+    }
+
+    /* 减少动态偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+
+      .reveal,
+      .reveal.show {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* 品牌 Logo 轻微旋转发光（极慢） */
+    .brand .logo {
+      animation: spinGlow 12s linear infinite;
+    }
+
+    /* App 图标轻微浮动 */
+    .app-icon {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* 主按钮光泽扫光效果 */
+    .btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      translate: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .35) 50%, transparent 100%);
+      transform: translateX(-120%);
+    }
+
+    .btn:hover::after {
+      animation: shine 900ms var(--ease);
+    }
+
+    /* 瓶贴 / 卡片悬浮更明显 */
+    .kp:hover,
+    .quote:hover {
+      box-shadow: var(--shadow-2);
+    }
+
+    /* 深色模式适配 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --bg-accent: #1a1a1a;
+        --surface: #1e1e22;
+        --surface-2: #2a2a30;
+        --text: #f3f3f3;
+        --muted: #a1a1aa;
+        --primary: #b197ff;
+        --primary-2: #7c3aed;
+        --cyan: #67e8f9;
+        --amber: #fbbf24;
+        --outline: #2f2f35;
+        --shadow-1: 0 4px 12px rgba(0, 0, 0, .5);
+        --shadow-2: 0 10px 28px rgba(0, 0, 0, .7);
+      }
+
+      body {
+        background: var(--bg)
+      }
+
+      header {
+        background: rgba(24, 24, 24, .9);
+        border-bottom: 1px solid var(--outline)
+      }
+
+      footer {
+        background: #181818;
+        border-top: 1px solid var(--outline)
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      background-image: linear-gradient(180deg, var(--bg-accent), var(--bg) 35%, var(--bg) 65%, var(--bg-accent));
+      background-attachment: fixed;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: saturate(120%)
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: auto;
+      padding: 0 20px
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      height: 64px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900
+    }
+
+    .brand .logo {
+      width: 20px; height: 20px; border-radius: 6px;
+      display: block; object-fit: cover;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, .08), 0 4px 10px rgba(124, 58, 237, .18);
+      border: 1px solid var(--outline);
+      background: none;
+    }
+
+    nav.links {
+      margin-left: auto;
+      display: flex;
+      gap: 10px
+    }
+
+    .link {
+      padding: 10px 12px;
+      border-radius: 10px;
+      transition: background var(--dur-m) var(--ease), transform var(--dur-f) var(--ease)
+    }
+
+    .link:hover {
+      background: var(--surface);
+      transform: translateY(-1px)
+    }
+
+    /* Hero */
+    .hero {
+      padding: 96px 0 28px;
+      text-align: center
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--outline);
+      background: var(--surface);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: var(--shadow-1)
+    }
+
+    .badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff, #fff2 60%, transparent 70%), linear-gradient(135deg, var(--primary-2), var(--cyan))
+    }
+
+    .title {
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.06;
+      margin: 12px 0 8px;
+      letter-spacing: .2px;
+      background: linear-gradient(90deg, #111, var(--primary) 70%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: .3px;
+    }
+
+    .subtitle {
+      margin: 10px 0 18px;
+      color: var(--muted)
+    }
+
+    .cta {
+      display: inline-flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px
+    }
+
+    .btn {
+      padding: 14px 22px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff;
+      font-weight: 800;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-2);
+      transition: transform var(--dur-f) var(--ease), filter var(--dur-m) var(--ease)
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      filter: saturate(110%)
+    }
+
+    /* 强化主按钮样式 */
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        box-shadow: var(--shadow-2), 0 0 0 0 rgba(124, 58, 237, .34);
+      }
+
+      50% {
+        box-shadow: var(--shadow-2), 0 0 0 10px rgba(124, 58, 237, .0);
+      }
+    }
+
+    .btn-primary {
+      padding: 16px 26px;
+      font-size: 17px;
+      letter-spacing: .3px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      border: 0;
+      animation: pulseGlow 2.6s ease-in-out infinite;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+    }
+
+    /* Modal 弹窗 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+    }
+
+    .modal.open {
+      display: block;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 10, .45);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(560px, calc(100% - 32px));
+      border-radius: 16px;
+      border: 1px solid transparent;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring1) border-box;
+      box-shadow: var(--shadow-2);
+      padding: 18px 18px 16px;
+      animation: fadeUp var(--dur-m) var(--ease);
+    }
+
+    .modal-card h3 {
+      margin: 4px 0 6px;
+      font-size: 22px;
+    }
+
+    .modal-desc {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .modal-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+
+    @media (max-width:560px) {
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--outline);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    /* Store / 在线体验按钮外观区分 */
+    .store-btn {
+      background: linear-gradient(135deg, #111, #333);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .store-btn {
+        background: linear-gradient(135deg, #1b1b1b, #333);
+      }
+    }
+
+    .live-btn {
+      background: linear-gradient(135deg, var(--primary-2), var(--cyan));
+      color: #fff;
+      font-weight: 800;
+    }
+    .testflight-btn { background: linear-gradient(135deg, #0ea5e9, #22d3ee); color: #fff; font-weight: 800; }
+    .btn .ico { display: inline-flex; width: 1em; height: 1em; margin-right: 8px; align-items: center; justify-content: center; }
+    .btn .ico svg { width: 1em; height: 1em; display: block; }
+
+    /* 打开弹窗时禁用页面滚动 */
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    /* 仅放软件图标（代替应用主界面截图），类似 Whisky */
+    .hero-icon {
+      display: flex;
+      justify-content: center;
+      margin-top: 28px
+    }
+
+    .app-icon {
+      width: 140px;
+      height: 140px;
+      border-radius: 28px;
+      box-shadow: var(--shadow-2);
+      border: 1px solid var(--outline);
+      background: linear-gradient(135deg, var(--primary-2), var(--primary));
+      position: relative;
+      overflow: hidden
+    }
+
+    .app-icon::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120px 80px at 30% 10%, rgba(255, 255, 255, .5), transparent 60%), radial-gradient(100px 60px at 80% 120%, rgba(255, 255, 255, .35), transparent 60%)
+    }
+
+    .app-icon img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .marquee {
+      display: flex;
+      gap: 14px;
+      overflow: auto;
+      scrollbar-width: none;
+      padding: 14px 6px;
+      margin: 22px auto 0;
+      max-width: 960px
+    }
+
+    .marquee::-webkit-scrollbar {
+      display: none
+    }
+
+    .pill {
+      white-space: nowrap;
+      padding: 8px 12px;
+      border: 1px solid var(--outline);
+      border-radius: 999px;
+      background: var(--surface);
+      box-shadow: var(--shadow-1)
+    }
+
+    section.block {
+      padding: 80px 0;
+      border-top: 1px solid var(--outline)
+    }
+
+    .h2 {
+      font-size: clamp(24px, 3.6vw, 36px);
+      margin: 0 0 8px
+    }
+
+    .lead {
+      color: var(--muted);
+      margin: 0 0 18px
+    }
+
+    .feat {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 24px;
+      align-items: center
+    }
+
+    .feat.reverse {
+      grid-template-columns: .95fr 1.05fr
+    }
+
+    @media (max-width:900px) {
+
+      .feat,
+      .feat.reverse {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .panel {
+      border: 1px solid transparent;
+      border-radius: 16px;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring1) border-box;
+      box-shadow: var(--shadow-1);
+      backdrop-filter: saturate(110%) blur(6px);
+    }
+
+    .panel>img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: inherit
+    }
+
+    .keypoints {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px
+    }
+
+    @media (max-width:900px) {
+      .keypoints {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media (max-width:640px) {
+      .keypoints {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .kp {
+      padding: 14px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring1) border-box;
+      box-shadow: var(--shadow-1);
+      transition: transform var(--dur-f) var(--ease), box-shadow var(--dur-m) var(--ease);
+      backdrop-filter: saturate(110%) blur(4px);
+    }
+
+    .kp:hover {
+      transform: translateY(-3px)
+    }
+
+    .kp .ico {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary-2), var(--cyan));
+      color: #fff;
+      font-weight: 900
+    }
+
+    .kp h3 {
+      margin: 6px 0 6px;
+      font-size: 16px
+    }
+
+    .kp p {
+      margin: 0;
+      color: var(--muted)
+    }
+
+    .socialproof {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px
+    }
+
+    @media (max-width:900px) {
+      .socialproof {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media (max-width:640px) {
+      .socialproof {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .quote {
+      padding: 14px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring1) border-box;
+      box-shadow: var(--shadow-1);
+      backdrop-filter: saturate(110%) blur(4px);
+    }
+
+    .quote b {
+      display: block;
+      margin-bottom: 6px
+    }
+
+    .bottom-cta {
+      padding: 90px 0;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg), var(--surface))
+    }
+
+    footer {
+      padding: 36px 0 54px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .foot-links {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand"><img class="logo" src="/image/app.png" alt="紫癜精灵 标志" width="20" height="20"><span>紫癜精灵</span></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <h1 class="title reveal" style="--d:0">加入「轻量自管」新范式</h1>
+        <p class="subtitle reveal" style="--d:1">用更少步骤记录健康、用更聪明的提醒维持习惯、用更直观的趋势洞察变化。</p>
+        <!-- 仅显示软件图标（无应用主界面截图） -->
+        <div class="hero-icon reveal" aria-hidden="true" style="--d:2">
+          <div class="app-icon" role="img" aria-label="紫癜精灵 图标">
+            <img src="/image/app.png" alt="紫癜精灵 应用图标" loading="lazy" decoding="async" />
+          </div>
+        </div>
+        <div class="cta reveal" style="--d:3">
+          <a id="ctaExperience" class="btn btn-primary" href="#experience">立即体验</a>
+        </div>
+        <div class="marquee reveal" aria-label="支持的记录类型" style="--d:4">
+          <span class="pill">症状日记</span>
+          <span class="pill">药物 & 用量</span>
+          <span class="pill">皮疹拍照</span>
+          <span class="pill">提醒计划</span>
+          <span class="pill">趋势洞察</span>
+          <span class="pill">导出分享</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="block">
+      <div class="container">
+        <div class="feat">
+          <div>
+            <h2 class="h2 reveal" style="--d:0">无需教程，直接上手</h2>
+            <p class="lead reveal" style="--d:1">像发消息一样记录；创建「每日卡片」，两步完成一次记录。</p>
+            <div class="keypoints">
+              <div class="kp reveal" style="--d:2">
+                <div class="ico">✍️</div>
+                <h3>快速预设</h3>
+                <p>常用字段一键填充，减少重复输入。</p>
+              </div>
+              <div class="kp reveal" style="--d:3">
+                <div class="ico">🖼️</div>
+                <h3>图片记录</h3>
+                <p>随时拍照留存，时间线自动归档。</p>
+              </div>
+              <div class="kp reveal" style="--d:4">
+                <div class="ico">🔁</div>
+                <h3>离线可写</h3>
+                <p>无网也能记；恢复后自动同步。</p>
+              </div>
+            </div>
+          </div>
+          <div class="panel reveal" style="--d:2"><img src="shot2.jpg" alt="新建记录示意" loading="lazy" decoding="async">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="container">
+        <div class="feat reverse">
+          <div class="panel reveal" style="--d:0"><img src="shot3.jpg" alt="提醒与日程示意" loading="lazy" decoding="async">
+          </div>
+          <div>
+            <h2 class="h2 reveal" style="--d:1">聪明提醒，安静不打扰</h2>
+            <p class="lead reveal" style="--d:2">按日程/频率提醒，夜间勿扰；重要事项分级突出。</p>
+            <div class="keypoints">
+              <div class="kp reveal" style="--d:3">
+                <div class="ico">⏱️</div>
+                <h3>多时段提醒</h3>
+                <p>支持工作日/周末与连续打卡。</p>
+              </div>
+              <div class="kp reveal" style="--d:4">
+                <div class="ico">🛌</div>
+                <h3>智能静默</h3>
+                <p>避开会议/睡眠，重要事项单独提示。</p>
+              </div>
+              <div class="kp reveal" style="--d:5">
+                <div class="ico">➡️</div>
+                <h3>一键推迟</h3>
+                <p>临时忙？稍后再记不丢失节奏。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="how">
+      <div class="container">
+        <div class="feat">
+          <div>
+            <h2 class="h2 reveal" style="--d:0">趋势洞察，一眼看懂</h2>
+            <p class="lead reveal" style="--d:1">周/月视图自动聚合关键字段，帮助你与医生更快对齐。</p>
+            <div class="keypoints">
+              <div class="kp reveal" style="--d:2">
+                <div class="ico">📈</div>
+                <h3>变化曲线</h3>
+                <p>症状/诱因/用药，多维度对比。</p>
+              </div>
+              <div class="kp reveal" style="--d:3">
+                <div class="ico">📤</div>
+                <h3>一键导出</h3>
+                <p>PDF/图片可选，便于沟通与备档。</p>
+              </div>
+              <div class="kp reveal" style="--d:4">
+                <div class="ico">🔒</div>
+                <h3>隐私优先</h3>
+                <p>数据本地加密存储，分享可控。</p>
+              </div>
+            </div>
+            <div class="socialproof">
+              <div class="quote reveal" style="--d:5"><b>“记录像聊天一样快。”</b>第一次用就上手，我把每日卡片设置好后基本不需要再改。</div>
+              <div class="quote reveal" style="--d:6"><b>“提醒很克制。”</b>不会在开会时震我，晚上也不会打扰，第二天早上补一次就行。</div>
+              <div class="quote reveal" style="--d:7"><b>“导出超方便。”</b>门诊前导出一张图，医生看了很快就理解我的变化。</div>
+            </div>
+          </div>
+          <div class="panel reveal" style="--d:2"><img src="shot4.jpg" alt="趋势与导出示意" loading="lazy" decoding="async">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 体验方式弹窗 -->
+  <div id="experienceModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-dismiss></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="expTitle">
+      <button class="modal-close" aria-label="关闭" data-dismiss>×</button>
+      <h3 id="expTitle">选择体验方式</h3>
+      <p class="modal-desc">无需注册，立即开始。</p>
+      <div class="modal-actions">
+        <!-- TODO: 替换为真实链接 -->
+        <a class="btn store-btn" href="https://apps.apple.com/" target="_blank" rel="noopener"> App Store</a>
+        <a class="btn testflight-btn" href="https://testflight.apple.com/" target="_blank" rel="noopener">
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 3h4v2h-1v3.3l4.5 7.4a4 4 0 0 1-3.4 6H8.9a4 4 0 0 1-3.4-6L10 8.3V5H9V3zM8.8 18h6.4a2 2 0 0 0 1.7-3L13 9.5h-2L7.1 15a2 2 0 0 0 1.7 3z"/>
+            </svg>
+          </span>
+          TestFlight 内测
+        </a>
+        <a class="btn live-btn" href="https://example.com/demo" target="_blank" rel="noopener">
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><polygon points="3,2 10,6 3,10"/></svg>
+          </span>
+          在线体验
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <button id="toTop" class="to-top" aria-label="返回顶部">↑</button>
+
+  <footer>
+    <div class="container">
+      <div>© 2025 紫癜精灵 · Purple Sprite</div>
+      <div class="foot-links">
+        <a href="#features">功能</a><span>·</span>
+        <a href="#how">上手</a><span>·</span>
+        <a href="#download">下载</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // 进场观察：当元素进入视口，添加 .show 触发动画
+    (function () {
+      const els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(el => el.classList.add('show'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('show');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      els.forEach(el => io.observe(el));
+
+      // 返回顶部按钮的显示/隐藏与点击
+      const topBtn = document.getElementById('toTop');
+      if (topBtn) {
+        const onScroll = () => {
+          const y = window.scrollY || document.documentElement.scrollTop;
+          if (y > 520) topBtn.classList.add('show'); else topBtn.classList.remove('show');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      }
+
+      // 跑马灯自动往返滚动（尊重减少动态）
+      const preferReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!preferReduce) {
+        document.querySelectorAll('.marquee').forEach((mq) => {
+          let dir = 1; // 1 向右，-1 向左
+          let rafId;
+          const speed = 0.35; // 调整速度
+          const step = () => {
+            mq.scrollLeft += dir * speed;
+            // 触边换向（留出 8px 缓冲）
+            if (mq.scrollLeft <= 0) dir = 1;
+            const max = mq.scrollWidth - mq.clientWidth;
+            if (mq.scrollLeft >= max - 8) dir = -1;
+            rafId = requestAnimationFrame(step);
+          };
+          const start = () => { if (!rafId) rafId = requestAnimationFrame(step); };
+          const stop = () => { cancelAnimationFrame(rafId); rafId = null; };
+          mq.addEventListener('mouseenter', stop);
+          mq.addEventListener('mouseleave', start);
+          start();
+        });
+      }
+
+      // 体验弹窗
+      const modal = document.getElementById('experienceModal');
+      const openBtn = document.getElementById('ctaExperience');
+      const dismissSelectors = '[data-dismiss]';
+      const openModal = () => {
+        if (!modal) return;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        const focusable = modal.querySelector('a, button');
+        if (focusable) focusable.focus({ preventScroll: true });
+      };
+      const closeModal = () => {
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (openBtn) openBtn.focus({ preventScroll: true });
+      };
+      if (openBtn && modal) {
+        openBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+        modal.addEventListener('click', (e) => { if (e.target.matches(dismissSelectors)) closeModal(); });
+        modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+      }
+    })();
+  </script>
+</body>
+
+</html>
