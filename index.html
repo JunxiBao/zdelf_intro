@@ -236,6 +236,12 @@
       }
     }
 
+    /* 修正 Modal 居中与入场动画冲突：在居中位基础上做 Y 方向位移 */
+    @keyframes fadeUpCenter {
+      from { opacity: 0; transform: translate(-50%, -50%) translateY(14px); }
+      to   { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+    }
+
     @keyframes float {
       0% {
         transform: translateY(0);
@@ -570,7 +576,7 @@
       background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--ring1) border-box;
       box-shadow: var(--shadow-2);
       padding: 18px 18px 16px;
-      animation: fadeUp var(--dur-m) var(--ease);
+      animation: fadeUpCenter var(--dur-m) var(--ease);
     }
 
     .modal-card h3 {
