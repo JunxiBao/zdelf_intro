@@ -1,0 +1,14 @@
+{
+  "app_name": "紫癜精灵",
+  "package_name": "com.junxibao.healthapp",
+  "versions": [
+    {
+      "version": "1.2.5.2",
+      "release_date": "2025-10-10",
+      "changes": [
+       "修复用户裁切头像时候的问题"
+      ]
+    }
+ 
+  ]
+}
